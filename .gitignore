@@ -1,0 +1,7 @@
+__pycache__
+venv
+/clickhouse/data
+/clickhouse/logs
+_trash
+.DS_Store
+#.env.dev

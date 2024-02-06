@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: de-task-clickhouse
+    ports:
+      - 8123:8123
+      - 9000:9000
+    env_file:
+      - ./.env.dev
+    volumes:
+      - ./clickhouse/data:/var/lib/clickhouse/
+      - ./clickhouse/logs:/var/log/clickhouse-server/
+      - ./clickhouse/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.dev
+    container_name: de-task-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./api/app:/app
+    depends_on:
+      - clickhouse
