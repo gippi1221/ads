@@ -1,7 +1,5 @@
 #!/bin/sh
-# entrypoint.sh
 
-# Define a function to check ClickHouse availability using Python's socket module
 check_clickhouse() {
     python3 - <<END
 import socket
@@ -21,8 +19,6 @@ print("ClickHouse is ready!")
 END
 }
 
-# Wait for ClickHouse to be ready
 check_clickhouse
 
-# Once ClickHouse is ready, start the API service
 exec uvicorn main:app --host 0.0.0.0 --port 8000 --reload

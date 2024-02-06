@@ -17,7 +17,7 @@ services:
   api:
     build:
       context: ./api
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     container_name: de-task-api
     ports:
       - "8000:8000"

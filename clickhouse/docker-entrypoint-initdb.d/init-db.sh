@@ -14,7 +14,7 @@ clickhouse client -n <<-EOSQL
         attribute5 Nullable(String),
         attribute6 Nullable(Bool),
         metric1 Int64,
-        metric2 Decimal(18,4)
+        metric2 Float64
     ) ENGINE = ReplacingMergeTree
     PARTITION BY toYYYYMMDD(event_date)
     ORDER BY (event_date)
