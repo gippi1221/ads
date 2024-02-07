@@ -2,7 +2,7 @@ import requests
 from datetime import datetime, timedelta
 import random
 
-url = 'http://88.99.188.179:8000/event/'
+url = 'http://localhost:8000/event/'
 
 def generate_random_date():
     start_date = datetime(datetime.now().year, 1, 1)
