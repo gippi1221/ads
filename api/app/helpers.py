@@ -1,5 +1,7 @@
 import json
+import re
 from datetime import datetime
+
 
 def parse_filters(filters_str: str) -> list:
   if filters_str is None:
@@ -23,3 +25,54 @@ def validate_iso_date(date_str):
   except ValueError:
     raise ValueError("Invalid date format. Expected format: YYYY-MM-DDTHH:mm:ss")
 
+def validate_params(groupBy: str, filters: str, metrics: str, granularity: str, startDate: str, endDate: str):
+
+  #mandatory parameters
+  if granularity not in ['hourly', 'daily']:
+    raise ValueError("Invalid granularity value, must be hourly or daily")
+  
+  if not re.match(r'^\w+(,\w+)?$', metrics):
+    raise ValueError("Invalid metrics value, must be comma-separated names")
+  
+  if not re.match(r'^\w+(,\w+)?$', groupBy):
+    raise ValueError("Invalid metrics value, must comma separated names")
+  
+  #others
+  if startDate:
+    validate_iso_date(startDate)
+
+  if endDate:
+    validate_iso_date(endDate)
+
+  if filters:
+    parsed_filters = parse_filters(filters)
+    for f in parsed_filters:
+      attribute = f['attribute']
+      value = f['value']
+
+      if attribute == 'attribute1':
+        try:
+          int(value)
+        except ValueError:
+          raise ValueError("Invalid value for attribute1. Expected an int.")
+      elif attribute == 'attribute2':
+        try:
+          int(value)
+        except ValueError:
+          raise ValueError("Invalid value for attribute2. Expected an int.")
+      elif attribute == 'attribute3':
+        try:
+          int(value)
+        except ValueError:
+          raise ValueError("Invalid value for attribute3. Expected an int.")
+      elif attribute == 'attribute4':
+        if not isinstance(value, str):
+          raise ValueError("Invalid type for attribute4. Expected str.")
+      elif attribute == 'attribute5':
+        if not isinstance(value, str):
+          raise ValueError("Invalid type for attribute5. Expected str.")
+      elif attribute == 'attribute6':
+        if value not in ['true', 'false']:
+          raise ValueError("Invalid type for attribute6. Expected bool.")
+      else:
+        raise ValueError("Unknown filter parameter")

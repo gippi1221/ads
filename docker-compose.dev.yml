@@ -21,6 +21,8 @@ services:
     container_name: de-task-api
     ports:
       - "8000:8000"
+    env_file:
+      - ./.env.dev
     volumes:
       - ./api/app:/app
     depends_on:

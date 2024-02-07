@@ -1,7 +1,5 @@
 from pydantic import BaseModel, validator
 from datetime import datetime
-from fastapi import Query
-from typing import Optional
 
 class Event(BaseModel):
   id: int

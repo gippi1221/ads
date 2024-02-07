@@ -1,39 +1,37 @@
 import logging
-import re
 import uvicorn
-import clickhouse_connect
-from clickhouse_connect import common
+import os
 from fastapi.responses import JSONResponse
 from fastapi import FastAPI, Query, Request
 from fastapi.exceptions import RequestValidationError
 from datetime import datetime
 from typing import Optional
 from models import Event
-from helpers import parse_filters, validate_iso_date
+from db import Database
+from helpers import validate_params
+from queries import build_stats_sql_query
 
-logging.basicConfig(level=logging.ERROR)
+log_level = os.getenv("LOG_LEVEL", "INFO").upper()
+logging.basicConfig(level=log_level)
 logger = logging.getLogger(__name__)
 
-common.set_setting('autogenerate_session_id', False)
-client = clickhouse_connect.get_client(host='clickhouse', port=8123, database='sample')
+db = Database(host='clickhouse', port=8123, database='sample')
 
 app = FastAPI()
 
 @app.exception_handler(RequestValidationError)
 async def value_error_exception_handler(request: Request, exc: RequestValidationError):
-  logger.error(exc)
+  logger.error("Request validation error: %s", exc, extra={'request_id': request.headers.get('Request-ID')})
   return JSONResponse(status_code=405, content={"description": "Invalid input"})
 
 @app.post('/event')
 async def add_event(event: Event):
   try:
-
-    row = [event.model_dump()[field] for field in event.model_fields.keys()]
-    client.insert('events', [row], column_names=list(event.model_fields.keys()))
+    db.insert_event('events', event)
+    logger.info("Successfully added event: %s", event)
     return JSONResponse(status_code=200, content={"description": "Successful operation"})
-
   except Exception as e:
-    logger.exception("An error occurred while processing the request.")
+    logger.exception("An error occurred while processing the request: %s", e)
     return JSONResponse(status_code=400, content={"description": "Internal error"})
 
 @app.get('/analytics/query')
@@ -46,95 +44,15 @@ async def get_data(
     endDate: Optional[str] = Query(None, description="End date and time for filtering (format: YYYY-MM-DDTHH:mm:ss)", example="2023-02-02T01:00:00")
   ):
   try:
-    
-    where_list = []
-    params = {}
 
-    #input params validation
-    if granularity not in ['hourly', 'daily']:
-      raise ValueError("Invalid granularity value, must be hourly or daily")
-    
-    if not re.match(r'^\w+(,\w+)?$', metrics):
-      raise ValueError("Invalid metrics value, must be comma-separated names")
+    logger.info("Request received: groupBy=%s, filters=%s, metrics=%s, granularity=%s, startDate=%s, endDate=%s",
+                groupBy, filters, metrics, granularity, startDate, endDate)
 
-    
-    if not re.match(r'^\w+(,\w+)?$', groupBy):
-      raise ValueError("Invalid metrics value, must comma separated names")
+    validate_params(groupBy, filters, metrics, granularity, startDate, endDate)
 
-    if startDate:
-      validate_iso_date(startDate)
-      where_list.append("event_date >= {start_date:DateTime}")
-      params['start_date'] = startDate
+    query, params = build_stats_sql_query(groupBy, filters, metrics, granularity, startDate, endDate)
+    result = db.query(query, params)
 
-    if endDate:
-      validate_iso_date(endDate)
-      where_list.append("event_date < {end_date:DateTime}")
-      params['end_date'] = endDate
-    
-    #parse filters array and validate input values
-    #populate where array and parameters dictionary
-    if filters:
-      parsed_filters = parse_filters(filters)
-      for f in parsed_filters:
-        attribute = f['attribute']
-        value = f['value']
-
-        if attribute == 'attribute1':
-          try:
-            int_value = int(value)
-          except ValueError:
-            raise ValueError("Invalid value for attribute1. Expected an int.")
-          where_list.append("attribute1 = {attribute1:Int64}")
-          params['attribute1'] = int_value
-        elif attribute == 'attribute2':
-          try:
-            int_value = int(value)
-          except ValueError:
-            raise ValueError("Invalid value for attribute2. Expected an int.")
-          where_list.append("attribute2 = {attribute2:Int64}")
-          params['attribute2'] = int_value
-        elif attribute == 'attribute3':
-          try:
-            int_value = int(value)
-          except ValueError:
-            raise ValueError("Invalid value for attribute3. Expected an int.")
-          where_list.append("attribute3 = {attribute3:Int64}")
-          params['attribute3'] = int_value
-        elif attribute == 'attribute4':
-          if not isinstance(value, str):
-            raise ValueError("Invalid type for attribute4. Expected str.")
-          where_list.append("attribute4 = {attribute4:String}")
-          params['attribute4'] = value
-        elif attribute == 'attribute5':
-          if not isinstance(value, str):
-            raise ValueError("Invalid type for attribute5. Expected str.")
-          where_list.append("attribute5 = {attribute5:String}")
-          params['attribute5'] = value
-        elif attribute == 'attribute6':
-          if value not in ['true', 'false']:
-            raise ValueError("Invalid type for attribute6. Expected bool.")
-          where_list.append("attribute6 = {attribute6:Bool}")
-          params['attribute6'] = value == 'true'
-        else:
-          raise ValueError("Unknown filter parameter")
-
-    #build db query
-    query = f"select {groupBy},date_trunc('{'hour' if granularity == 'hourly' else 'day'}', event_date) as date"
-
-    for m in metrics.split(','):
-      query += f",sum({m}) as {m}"
-
-    query += f"\nfrom events"
-
-    if where_list:
-      where_clause = " and ".join(where_list)
-      query += f"\nwhere {where_clause}"
-
-    query += f"\ngroup by date_trunc('{'hour' if granularity == 'hourly' else 'day'}', event_date),{groupBy}"
-    
-    result = client.query(query, parameters=params)
-
-    #convert result to expected structure
     data = []
     for row in result.result_rows:
       obj = {}
@@ -146,15 +64,16 @@ async def get_data(
         else:
           obj[val] = row[idx]
       data.append(obj)
-
+    
+    logger.info("The requested data: %s", data)
     return JSONResponse(status_code=200, content={'results': data})
 
   except ValueError as e:
-    logger.exception(e)
+    logger.exception("Value error occurred: %s", e)
     return JSONResponse(status_code=405, content={"description": "Invalid input"})
 
   except Exception as e:
-    logger.exception("An error occurred while processing the request.")
+    logger.exception("An error occurred while processing the request: %s", e)
     return JSONResponse(status_code=400, content={"description": "Internal error"})
 
 if __name__ == "__main__":
