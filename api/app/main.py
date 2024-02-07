@@ -1,5 +1,6 @@
 import logging
 import re
+import uvicorn
 import clickhouse_connect
 from clickhouse_connect import common
 from fastapi.responses import JSONResponse
@@ -10,7 +11,7 @@ from typing import Optional
 from models import Event
 from helpers import parse_filters, validate_iso_date
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
 common.set_setting('autogenerate_session_id', False)
@@ -53,10 +54,11 @@ async def get_data(
     if granularity not in ['hourly', 'daily']:
       raise ValueError("Invalid granularity value, must be hourly or daily")
     
-    if not re.match(r'^\w+(,\w+)+$', metrics):
-      raise ValueError("Invalid metrics value, must comma separated names")
+    if not re.match(r'^\w+(,\w+)?$', metrics):
+      raise ValueError("Invalid metrics value, must be comma-separated names")
+
     
-    if not re.match(r'^\w+(,\w+)+$', groupBy):
+    if not re.match(r'^\w+(,\w+)?$', groupBy):
       raise ValueError("Invalid metrics value, must comma separated names")
 
     if startDate:
@@ -152,3 +154,6 @@ async def get_data(
   except Exception as e:
     logger.exception("An error occurred while processing the request.")
     return JSONResponse(status_code=400, content={"description": "Internal error"})
+
+if __name__ == "__main__":
+  uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
