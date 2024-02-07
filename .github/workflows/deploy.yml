@@ -2,7 +2,7 @@ name: Deployment Pipeline
 
 on:
   push:
-    branches: [ "develop" ]
+    branches: [ "master" ]
 
 jobs:
   build:
@@ -10,11 +10,9 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build
-      working-directory: ${{ env.BUILD_DIRECTORY }}
       run: |
         docker compose -f docker-compose.prd.yml build
     - name: Deploy
-      working-directory: ${{ env.DEPLOY_DIRECTORY }}
       run: |
         docker compose -f docker-compose.prd.yml up -d
         docker compose -f docker-compose.prd.yml exec -it nginx nginx -s reload
