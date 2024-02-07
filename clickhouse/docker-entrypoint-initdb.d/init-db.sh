@@ -15,7 +15,7 @@ clickhouse client -n <<-EOSQL
         attribute6 Nullable(Bool),
         metric1 Int64,
         metric2 Float64
-    ) ENGINE = ReplacingMergeTree
+    ) ENGINE = MergeTree()
     PARTITION BY toYYYYMMDD(event_date)
     ORDER BY (id)
     TTL event_date + INTERVAL 30 DAY;
