@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import Optional
 from models import Event
 from db import Database
-from helpers import validate_params
+from helpers import validate_params, convert_data_to_output
 from queries import build_stats_sql_query
 
 #make sure the production logger has ERROR or CRITICAL
@@ -67,17 +67,7 @@ async def get_data(
     result = db.query(query, params)
 
     #convert data to expected result
-    data = []
-    for row in result.result_rows:
-      obj = {}
-      for idx, val in enumerate(result.column_names):
-        if isinstance(row[idx], datetime):
-          obj[val] = row[idx].isoformat()
-        elif isinstance(row[idx], float):
-          obj[val] = round(row[idx], 2)
-        else:
-          obj[val] = row[idx]
-      data.append(obj)
+    data = convert_data_to_output(result)
     
     logger.info("The requested data: %s", data)
     return JSONResponse(status_code=200, content={'results': data})

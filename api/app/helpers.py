@@ -23,6 +23,20 @@ def parse_filters(filters_str: str) -> list:
   except json.JSONDecodeError:
       raise ValueError("Invalid JSON format for filters.")
   
+def convert_data_to_output(result):
+  data = []
+  for row in result.result_rows:
+    obj = {}
+    for idx, val in enumerate(result.column_names):
+      if isinstance(row[idx], datetime):
+        obj[val] = row[idx].isoformat()
+      elif isinstance(row[idx], float):
+        obj[val] = round(row[idx], 2)
+      else:
+        obj[val] = row[idx]
+    data.append(obj)
+  return data
+
 def validate_iso_date(date_str):
   """
   Function is to validate incoming string is ISO date
