@@ -88,7 +88,7 @@ This block is to keep my thoughts for further analysis, some of the consideratio
 **read-only replica**
 - Clickhouse allows to have read-only replica. It can be used when there is a need to separate write intensive request with analytical queries. This approach can also be useful if the analytics queries come from distant sources.
 
-**application code refactoring**
+**application code refactoring**<br>
 Perhaps the desire to strictly type the incoming parameters for better data validation, the application API code turned out to be overloaded. From this point I see some conclusins for further analysis and enhancements:
 - The response time might be improved if the data retrieved from the db transferred directly to the requestor. Manipulating with the data inside api causes additional time and resources.
 - The data validation takes some resources as well.
