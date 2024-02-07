@@ -77,8 +77,10 @@ This block is to keep my thoughts for further analysis, some of the consideratio
  - Storing data in one table with daily partitions.
    The task states that a large amount of data is expected, but there are no specifics, so I made partitions by day. For real use, this needs to be further analyzed and partitions configured depending on the initial requirements and real requests for data.
  - For housekeeping needs the TTL option is enabled and set to event_date + 30 days. All the data older than 30 days will be removed by clickhouse.
- - ReplacingMergeTree is selected as engine.
-   It is not clear from the task how to work with duplicates. The approach I used is to keep only the last received entry. Yes, due to some specific background activities of clickhouse, at some point in time we can have two identical records (by its key), but again, it is not clear how critical this is and whether such events are possible due to the design of the system as a whole.
+ - MergeTree is selected as an engine.
+   It is not clear from the task how to work with duplicates. I believe the MergeTree is better choice for massive insertion of data. However, there is a possibility for duplication.
+ - Data compression on the server level.
+   There is always a possibility to enable data compression in clickhouse. However it's not clear the expectation of the system - should it accept the inserts quickly or should it response quickly with the query result.
 
 **horizontal scaling**
 - The technologies used in this solution are good for scalling. There are several options how to achieve performance improvement by adding application servers and database servers. The load balancer will route requests between resources. It can solve not only http request overhead but the network related issue also.
