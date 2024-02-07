@@ -2,6 +2,9 @@ from pydantic import BaseModel, validator
 from datetime import datetime
 
 class Event(BaseModel):
+  """
+  Represents an event with various attributes and metrics.
+  """
   id: int
   event_date: datetime
   attribute1: int = None
@@ -13,6 +16,7 @@ class Event(BaseModel):
   metric1: int
   metric2: float
   
+  #custom validators. there is a room for improvement
   @validator("event_date", pre=True)
   def validate_date(cls, value):
     return value

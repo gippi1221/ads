@@ -4,6 +4,10 @@ from datetime import datetime
 
 
 def parse_filters(filters_str: str) -> list:
+  """
+  Function is to validate incoming string is json array
+  Returns the list of values
+  """
   if filters_str is None:
     return []
   try:
@@ -20,13 +24,18 @@ def parse_filters(filters_str: str) -> list:
       raise ValueError("Invalid JSON format for filters.")
   
 def validate_iso_date(date_str):
+  """
+  Function is to validate incoming string is ISO date
+  """
   try:
     datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S")
   except ValueError:
     raise ValueError("Invalid date format. Expected format: YYYY-MM-DDTHH:mm:ss")
 
 def validate_params(groupBy: str, filters: str, metrics: str, granularity: str, startDate: str, endDate: str):
-
+  """
+  Function is to validate incoming query parameters
+  """
   #mandatory parameters
   if granularity not in ['hourly', 'daily']:
     raise ValueError("Invalid granularity value, must be hourly or daily")

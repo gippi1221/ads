@@ -1,9 +1,17 @@
 from helpers import parse_filters
 
 def build_stats_sql_query(groupBy: str, filters: str, metrics: str, granularity: str, startDate: str, endDate: str):
+  """
+  This function constructs the sql query with the details provided
+
+  Returns:
+    1) constructed sql query
+    2) parameters
+  """
   where_list = []
   params = {}
 
+  #gather predicates and where clause
   if startDate:
     where_list.append("event_date >= {start_date:DateTime}")
     params['start_date'] = startDate

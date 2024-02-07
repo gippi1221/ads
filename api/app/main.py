@@ -11,9 +11,12 @@ from db import Database
 from helpers import validate_params
 from queries import build_stats_sql_query
 
+#make sure the production logger has ERROR or CRITICAL
+#as it can signifitly decrease the processing capability due to IO consuption
 log_level = os.getenv("LOG_LEVEL", "INFO").upper()
 logging.basicConfig(level=log_level)
 logger = logging.getLogger(__name__)
+
 
 db = Database(host='clickhouse', port=8123, database='sample')
 
@@ -26,6 +29,9 @@ async def value_error_exception_handler(request: Request, exc: RequestValidation
 
 @app.post('/event')
 async def add_event(event: Event):
+  """
+  This method is to create a new event in the DB
+  """
   try:
     db.insert_event('events', event)
     logger.info("Successfully added event: %s", event)
@@ -43,16 +49,24 @@ async def get_data(
     startDate: Optional[str] = Query(None, description="Start date and time for filtering (format: YYYY-MM-DDTHH:mm:ss)", example="2023-02-02T01:00:00"),
     endDate: Optional[str] = Query(None, description="End date and time for filtering (format: YYYY-MM-DDTHH:mm:ss)", example="2023-02-02T01:00:00")
   ):
+  """
+  This method is to provide aggregated data
+  """
   try:
 
     logger.info("Request received: groupBy=%s, filters=%s, metrics=%s, granularity=%s, startDate=%s, endDate=%s",
                 groupBy, filters, metrics, granularity, startDate, endDate)
 
+    #validate incoming parameters
     validate_params(groupBy, filters, metrics, granularity, startDate, endDate)
 
+    #build parametrized sql query
     query, params = build_stats_sql_query(groupBy, filters, metrics, granularity, startDate, endDate)
+
+    #query data
     result = db.query(query, params)
 
+    #convert data to expected result
     data = []
     for row in result.result_rows:
       obj = {}
@@ -60,7 +74,7 @@ async def get_data(
         if isinstance(row[idx], datetime):
           obj[val] = row[idx].isoformat()
         elif isinstance(row[idx], float):
-          obj[val] = "{:.2f}".format(row[idx])
+          obj[val] = round(row[idx], 2)
         else:
           obj[val] = row[idx]
       data.append(obj)
@@ -75,6 +89,8 @@ async def get_data(
   except Exception as e:
     logger.exception("An error occurred while processing the request: %s", e)
     return JSONResponse(status_code=400, content={"description": "Internal error"})
+
+
 
 if __name__ == "__main__":
   uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
