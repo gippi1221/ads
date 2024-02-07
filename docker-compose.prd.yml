@@ -10,8 +10,8 @@ services:
     env_file:
       - ./.env.prd
     volumes:
-      - ./clickhouse/data:/var/lib/clickhouse/
-      - ./clickhouse/logs:/var/log/clickhouse-server/
+      - clickhouse-data:/var/lib/clickhouse/
+      - clickhouse-logs:/var/log/clickhouse-server/
       - ./clickhouse/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     logging:
       driver: "json-file"
@@ -50,3 +50,7 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+volumes:
+  clickhouse-data:
+  clickhouse-logs:
