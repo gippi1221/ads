@@ -8,7 +8,7 @@ from fastapi.exceptions import RequestValidationError
 from datetime import datetime
 from typing import Optional
 from models import Event
-from helpers import parse_filters
+from helpers import parse_filters, validate_iso_date
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -27,8 +27,8 @@ async def value_error_exception_handler(request: Request, exc: RequestValidation
 async def add_event(event: Event):
   try:
 
-    row = [event.dict()[field] for field in event.__fields__.keys()]
-    client.insert('events', [row], column_names=list(event.__fields__.keys()))
+    row = [event.model_dump()[field] for field in event.model_fields.keys()]
+    client.insert('events', [row], column_names=list(event.model_fields.keys()))
     return JSONResponse(status_code=200, content={"description": "Successful operation"})
 
   except Exception as e:
@@ -60,10 +60,12 @@ async def get_data(
       raise ValueError("Invalid metrics value, must comma separated names")
 
     if startDate:
+      validate_iso_date(startDate)
       where_list.append("event_date >= {start_date:DateTime}")
       params['start_date'] = startDate
 
     if endDate:
+      validate_iso_date(endDate)
       where_list.append("event_date < {end_date:DateTime}")
       params['end_date'] = endDate
     

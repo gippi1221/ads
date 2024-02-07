@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 def parse_filters(filters_str: str) -> list:
   if filters_str is None:
@@ -16,3 +17,9 @@ def parse_filters(filters_str: str) -> list:
   except json.JSONDecodeError:
       raise ValueError("Invalid JSON format for filters.")
   
+def validate_iso_date(date_str):
+  try:
+    datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S")
+  except ValueError:
+    raise ValueError("Invalid date format. Expected format: YYYY-MM-DDTHH:mm:ss")
+
