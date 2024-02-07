@@ -141,6 +141,8 @@ async def get_data(
       for idx, val in enumerate(result.column_names):
         if isinstance(row[idx], datetime):
           obj[val] = row[idx].isoformat()
+        elif isinstance(row[idx], float):
+          obj[val] = "{:.2f}".format(row[idx])
         else:
           obj[val] = row[idx]
       data.append(obj)
