@@ -13,8 +13,6 @@ export const fetchEvents = async (groupBy, metrics, granularity, startDate, endD
     str = str + `&filters=${filters}`
   }
 
-  console.log(str)
-
   const {data} = await $host.get(str)
   return data
 }

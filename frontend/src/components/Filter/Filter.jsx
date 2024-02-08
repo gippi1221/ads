@@ -9,7 +9,6 @@ const Filter = () => {
   const [form] = Form.useForm()
 
   const onFinish = (values) => {
-    console.log(values)
     const params = {
       granularity: values.granularity,
       groupBy: values.attributes ? values.attributes.join(',') : undefined,
@@ -24,8 +23,7 @@ const Filter = () => {
       params.endDate = dayjs(values.date_range[1]).format('YYYY-MM-DDTHH:mm:ss')
     }
 
-    if (values.filters.length) {
-      console.log(JSON.stringify(values.filters))
+    if (values.filters && values.filters.length) {
       params.filters = JSON.stringify(values.filters)
     }
 
@@ -67,6 +65,7 @@ const Filter = () => {
         name='metrics'
         label='Metrics'
         rules={[{required: true, message: 'Input value here'}]}
+        initialValue={['metric1','metric2']}
       >
         <Select
           mode="multiple"
@@ -84,6 +83,7 @@ const Filter = () => {
         name='attributes'
         label='Group By'
         rules={[{required: true, message: 'Input value here'}]}
+        initialValue={['attribute1']}
       >
         <Select
           mode="multiple"

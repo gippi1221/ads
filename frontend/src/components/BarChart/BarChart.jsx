@@ -3,15 +3,22 @@ import { Column } from '@ant-design/plots';
 
 const BarChart = ({attribute, data, metric}) => {
 
-  console.log(data.filter(d => d.attribute1 === 111))
+  
 
   const config = {
-    data,//: data.filter(d => [111, 222, 333, 444, 555, 666, 777, 888, 999, 1111, 2222, 3333, 4444, 5555, 6666, 7777, 8888, 9999].includes(d.attribute1)),
+    data: data.map(d => ({date: d.date, metric: d[metric], attribute: d[attribute] && (d[attribute]).toString()})),
     xField: 'date',
-    yField: metric,
+    yField: 'metric',
     stack: true,
-    colorField: attribute,
-    tooltip: false,
+    colorField: 'attribute',
+    legend: false,
+    percent: true,
+    interaction: {
+      tooltip: {
+        shared: true,
+      },
+    },
+    tooltip: { channel: 'y0', valueFormatter: (d) => `${(d * 100).toFixed(2)}%` },
   };
 
   return <Column {...config} />;
