@@ -58,6 +58,11 @@ services:
       - "2181:2181"
     env_file:
       - ./.env.dev
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   kafka:
     image: wurstmeister/kafka
@@ -72,6 +77,11 @@ services:
       interval: 5s
       timeout: 10s
       retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   clickhouse-data:
