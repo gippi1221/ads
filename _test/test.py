@@ -4,7 +4,7 @@ import asyncio
 from datetime import datetime, timedelta
 import random
 
-url = 'http://localhost:8000/event/'
+url = 'http://localhost:8088/event/'
 
 async def generate_random_date():
     start_date = datetime(datetime.now().year, 2, 1)
