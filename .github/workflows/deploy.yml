@@ -1,0 +1,21 @@
+name: Deployment Pipeline
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: [self-hosted]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build
+      run: |
+        docker compose -f docker-compose.prd.yml build
+    - name: Deploy
+      run: |
+        docker compose -f docker-compose.prd.yml up -d
+        docker compose -f docker-compose.prd.yml exec -it nginx nginx -s reload
+    - name: Housekeeping
+      run: |
+        docker image prune -a -f --filter "until=24h"

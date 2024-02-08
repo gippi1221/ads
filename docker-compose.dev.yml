@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: de-task-clickhouse
+    ports:
+      - 8123:8123
+      - 9000:9000
+    env_file:
+      - ./.env.dev
+    volumes:
+      - ./clickhouse/data:/var/lib/clickhouse/
+      - ./clickhouse/logs:/var/log/clickhouse-server/
+      - ./clickhouse/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: de-task-api
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.env.dev
+    volumes:
+      - ./api/app:/app
+    depends_on:
+      - clickhouse
+
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: de-task-zookeeper
+    ports:
+      - "2181:2181"
+    env_file:
+      - ./.env.dev
+
+  kafka:
+    image: wurstmeister/kafka
+    container_name: de-task-kafka
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    env_file:
+      - ./.env.dev
+    healthcheck:
+      test: ["CMD", "kafka-topics.sh", "--list", "--zookeeper", "zookeeper:2181"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
