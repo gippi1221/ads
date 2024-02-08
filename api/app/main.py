@@ -1,6 +1,7 @@
 import logging
 import uvicorn
 import os
+import json
 from fastapi.responses import JSONResponse
 from fastapi import FastAPI, Query, Request
 from fastapi.exceptions import RequestValidationError
@@ -10,6 +11,7 @@ from models import Event
 from db import Database
 from helpers import validate_params, convert_data_to_output
 from queries import build_stats_sql_query
+from producer import KafkaProducer
 
 #make sure the production logger has ERROR or CRITICAL
 #as it can signifitly decrease the processing capability due to IO consuption
@@ -17,10 +19,19 @@ log_level = os.getenv("LOG_LEVEL", "INFO").upper()
 logging.basicConfig(level=log_level)
 logger = logging.getLogger(__name__)
 
-
 db = Database(host='clickhouse', port=8123, database='sample')
 
 app = FastAPI()
+
+producer = KafkaProducer()
+
+@app.on_event("startup")
+async def startup_event():
+  await producer.setup()
+
+@app.on_event("shutdown")
+async def shutdown_event():
+  await producer.close()
 
 @app.exception_handler(RequestValidationError)
 async def value_error_exception_handler(request: Request, exc: RequestValidationError):
@@ -33,7 +44,12 @@ async def add_event(event: Event):
   This method is to create a new event in the DB
   """
   try:
-    db.insert_event('events', event)
+    if producer.producer is None:
+      logger.exception("The kafka producer is not ready: %s", e)
+      return JSONResponse(status_code=400, content={"description": "Internal error"})
+    
+    # Produce message to Kafka topic
+    await producer.send_data_to_kafka(event.model_dump_json())
     logger.info("Successfully added event: %s", event)
     return JSONResponse(status_code=200, content={"description": "Successful operation"})
   except Exception as e:

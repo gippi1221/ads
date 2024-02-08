@@ -7,7 +7,7 @@ import random
 url = 'http://localhost:8000/event/'
 
 async def generate_random_date():
-    start_date = datetime(datetime.now().year, 1, 1)
+    start_date = datetime(datetime.now().year, 2, 1)
     end_date = datetime(datetime.now().year, 2, 28)
     random_days = random.randint(0, (end_date - start_date).days)
     return (start_date + timedelta(days=random_days)).isoformat()
