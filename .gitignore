@@ -5,3 +5,4 @@ venv
 _trash
 .DS_Store
 #.env.dev
+node_modules

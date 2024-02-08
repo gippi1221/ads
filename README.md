@@ -12,6 +12,7 @@ It provides the ability to gather new events, as well as analytics of already co
 ### Technology stack
  - [FastAPI](https://fastapi.tiangolo.com/): A framework for creating web APIs in Python.
  - [Clickhouse](https://clickhouse.com//): columnar database for fast analysis of large volumes of data.
+ - [Kafka](https://kafka.apache.org/): Message broker. In this project, kafka is responsible to gather events for batch upload to Clickhouse using Materialized view.
  - [Logging](https://docs.python.org/3/library/logging.html): module for logging events.
  - [Pydantic](https://docs.pydantic.dev/latest/): A library for data validation and data schema creation.
 
@@ -72,6 +73,9 @@ All the services consume the .env file with variables. The production containers
 
 ### Things for consideration
 This block is to keep my thoughts for further analysis, some of the consideration depends on the facts that were not mentioned in the task. In order to enhance the solution, some details should be clarified.
+
+**CPU overhead**
+ - First iteration of the project was to ensure the direct writes to CH. However, I realised that it is cpu consuming. I decided to change the way of publishing messages to CH through Kafka engine and Materialized view. This approach allow us to move CPU overhead from DB to api application. In my mind, to scale the api apps is "cheaper" then to scale DB.
 
 **data storage**
  - Storing data in one table with daily partitions.
