@@ -27,3 +27,25 @@ services:
       - ./api/app:/app
     depends_on:
       - clickhouse
+
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: de-task-zookeeper
+    ports:
+      - "2181:2181"
+    env_file:
+      - ./.env.dev
+
+  kafka:
+    image: wurstmeister/kafka
+    container_name: de-task-kafka
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    env_file:
+      - ./.env.dev
+    healthcheck:
+      test: ["CMD", "kafka-topics.sh", "--list", "--zookeeper", "zookeeper:2181"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
