@@ -4,7 +4,7 @@ import asyncio
 from datetime import datetime, timedelta
 import random
 
-url = 'http://localhost:8000/event/'
+url = 'http://88.99.188.179:8000/event/'
 
 async def generate_random_date():
     start_date = datetime(datetime.now().year, 2, 1)
@@ -31,18 +31,14 @@ async def write_log(filename, content):
         await f.write(content + '\n')
 
 async def send_requests(session, url, data, log_filename):
-    start_time = datetime.now()
-    async with session.post(url, json=data) as response:
-        end_time = datetime.now()
-        response_time = end_time - start_time
-        log_message = f"Request: {data['id']}, Status Code: {response.status}, Response Time: {response_time}"
-        await write_log(log_filename, log_message)
+    response = await session.post(url, json=data)
+    await response.release() 
 
 async def main():
-    for _ in range(1000):
+    for _ in range(100):
         tasks = []
         async with aiohttp.ClientSession() as session:
-            for _ in range(1000):
+            for _ in range(10000):
                 data = await generate_random_data()
                 task = asyncio.create_task(send_requests(session, url, data, 'request_log.txt'))
                 tasks.append(task)
