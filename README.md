@@ -24,6 +24,10 @@ The command below is used to launch the application. It will build and run all t
 ```
 docker-compose -f docker-compose.prd.yml up -d
 ```
+The nginx is available on port: 8088
+The application endpoints:
+ - \<server-address>:8088/event/
+ - \<server-address>:8088/analytics/query
 #### Monitoring
 The command below is used to monitor the services execution. Change the LOG_LEVEL environment variable to see all the messages. By default it is set to ERROR level for prod-like environments.
 ```
