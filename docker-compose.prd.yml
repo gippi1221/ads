@@ -4,9 +4,6 @@ services:
   clickhouse:
     image: clickhouse/clickhouse-server:latest
     container_name: de-task-clickhouse
-    ports:
-      - 8123:8123
-      - 9000:9000
     env_file:
       - ./.env.prd
     volumes:
@@ -24,8 +21,6 @@ services:
       context: ./api
       dockerfile: Dockerfile
     container_name: de-task-api
-    ports:
-      - "8000:8000"
     env_file:
       - ./.env.prd
     depends_on:
@@ -42,7 +37,7 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     ports:
-      - "8080:80"
+      - "8088:80"
     depends_on:
       - api
     logging:
@@ -54,8 +49,6 @@ services:
   zookeeper:
     image: wurstmeister/zookeeper
     container_name: de-task-zookeeper
-    ports:
-      - "2181:2181"
     env_file:
       - ./.env.dev
     logging:
@@ -67,9 +60,6 @@ services:
   kafka:
     image: wurstmeister/kafka
     container_name: de-task-kafka
-    ports:
-      - "9092:9092"
-      - "9093:9093"
     env_file:
       - ./.env.dev
     healthcheck:
