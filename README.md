@@ -12,19 +12,26 @@ It provides the ability to gather new events, as well as analytics of already co
 ### Technology stack
  - [FastAPI](https://fastapi.tiangolo.com/): A framework for creating web APIs in Python.
  - [Clickhouse](https://clickhouse.com//): columnar database for fast analysis of large volumes of data.
- - [Kafka](https://kafka.apache.org/): Message broker. In this project, kafka is responsible to gather events for batch upload to Clickhouse using Materialized view.
+ - [Kafka](https://kafka.apache.org/): event streaming platform to handle large amount of events.
  - [Logging](https://docs.python.org/3/library/logging.html): module for logging events.
  - [Pydantic](https://docs.pydantic.dev/latest/): A library for data validation and data schema creation.
+
+### The System Design
+![Design](./Design.png)
 
 #### Deployment
 The command below is used to launch the application. It will build and run all the necessary services.
 ```
 docker-compose -f docker-compose.prd.yml up -d
 ```
+The nginx is available on port: 8088
+The application endpoints:
+ - \<server-address>:8088/event/
+ - \<server-address>:8088/analytics/query
 #### Monitoring
 The command below is used to monitor the services execution. Change the LOG_LEVEL environment variable to see all the messages. By default it is set to ERROR level for prod-like environments.
 ```
-docker-compose -f docker-compose.prd.yml up -d
+docker-compose -f docker-compose.prd.yml logs -f
 ```
 #### Maintenance and Updates
 The github actions is used to ci/cd changes. All the Commits/Pull requests pushed to master will be delivered by actions workflow. To read more about it, use [this link](https://docs.github.com/en/actions).
@@ -40,7 +47,7 @@ docker-compose -f docker-compose.prd.yml down -v
 ```
 
 ### Development
-You can use **docker-compose.dev.yml** configuration for development purposes in your local environment. The separate docker-compose files are used for scalability.
+You can use **docker-compose.dev.yml** configuration for development purposes in your local environment. The separate docker-compose files are used for better development expirience.
 
 ### Services
 All the services consume the .env file with variables. The production containers have additional logging rules.
@@ -55,10 +62,15 @@ All the services consume the .env file with variables. The production containers
 **nginx**
 - The basic nginx image with a simple configuration file.
 
+**kafka**
+- The image created by wurstmeister. Kafka cluster has only one broker. Some default settings described in env file
+
+**zookeeper**
+- The image created by wurstmeister. 
+
 ### Why did I choose this stack?
 **Clickhouse**
 - This columnar DBMS is great for quickly returning aggregated data.
-- It provides the capability for really fast data insertion.
 - Possibility of horizontal scaling. Master-Slave, Master-Master replications
 - It was also a plus that I had little experience working with it.
 
@@ -70,12 +82,15 @@ All the services consume the .env file with variables. The production containers
 **Nginx**
 - This service will come in handy if we need to implement application load balancing.
 
+**Kafka**
+- I faced an issue with CPU overload by clickhouse, kafka is used here to ensure smooth processing of events to clickhouse by its own engine.
+
 
 ### Things for consideration
 This block is to keep my thoughts for further analysis, some of the consideration depends on the facts that were not mentioned in the task. In order to enhance the solution, some details should be clarified.
 
 **CPU overhead**
- - First iteration of the project was to ensure the direct writes to CH. However, I realised that it is cpu consuming. I decided to change the way of publishing messages to CH through Kafka engine and Materialized view. This approach allow us to move CPU overhead from DB to api application. In my mind, to scale the api apps is "cheaper" then to scale DB.
+ - First iteration of the project was to ensure the direct writes to Clickhouse. However, I realised that CH becomes a cpu consumer. I decided to change the way of publishing messages to CH through Kafka engine and Materialized view. This approach allow us to move CPU overhead from DB to api application level. In my mind, to scale the api apps is "cheaper" then to scale DB.
 
 **data storage**
  - Storing data in one table with daily partitions.

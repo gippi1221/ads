@@ -24,6 +24,9 @@ def parse_filters(filters_str: str) -> list:
       raise ValueError("Invalid JSON format for filters.")
   
 def convert_data_to_output(result):
+  """
+  Function is to convert clickhouse output to desired requestor output
+  """
   data = []
   for row in result.result_rows:
     obj = {}
@@ -54,10 +57,10 @@ def validate_params(groupBy: str, filters: str, metrics: str, granularity: str, 
   if granularity not in ['hourly', 'daily']:
     raise ValueError("Invalid granularity value, must be hourly or daily")
   
-  if not re.match(r'^\w+(,\w+)?$', metrics):
+  if not re.match(r'^\w+(,\s*\w+)*$', metrics):
     raise ValueError("Invalid metrics value, must be comma-separated names")
   
-  if not re.match(r'^\w+(,\w+)?$', groupBy):
+  if not re.match(r'^\w+(,\s*\w+)*$', groupBy):
     raise ValueError("Invalid metrics value, must comma separated names")
   
   #others
