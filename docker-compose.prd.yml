@@ -25,6 +25,7 @@ services:
       - ./.env.prd
     depends_on:
       - clickhouse
+      - kafka
     logging:
       driver: "json-file"
       options:
