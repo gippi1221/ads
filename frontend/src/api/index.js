@@ -1,9 +1,8 @@
 import axios from 'axios';
 
 const $host = axios.create({
-  baseURL: '/',
+  baseURL: process.env.REACT_APP_BACKEND_URL,
   timeout: 5000,
-  withCredentials: true,
 });
 
 export default $host;

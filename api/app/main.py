@@ -12,6 +12,7 @@ from db import Database
 from helpers import validate_params, convert_data_to_output
 from queries import build_stats_sql_query
 from producer import KafkaProducer
+from fastapi.middleware.cors import CORSMiddleware
 
 #make sure the production logger has ERROR or CRITICAL
 #as it can signifitly decrease the processing capability due to IO consuption
@@ -22,6 +23,11 @@ logger = logging.getLogger(__name__)
 db = Database(host='clickhouse', port=8123, database='sample')
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+)
 
 producer = KafkaProducer()
 
