@@ -39,7 +39,7 @@ const Filter = () => {
       onFinish={onFinish}
       requiredMark='optional'
       labelCol={{
-        span: 4,
+        span: 6,
       }}
     >
       <Form.Item

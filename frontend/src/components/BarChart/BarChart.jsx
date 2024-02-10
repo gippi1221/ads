@@ -3,12 +3,26 @@ import { Column } from '@ant-design/plots';
 
 const BarChart = ({attribute, data, metric}) => {
 
-  
+  const result = data.reduce((acc, d) => {
+    const key = `${d.dataset}_${d.date}_${d[attribute]}`;
+    if (!acc[key]) {
+      acc[key] = {
+        dataset: d.dataset,
+        date: d.date,
+        attribute: d[attribute] && (d[attribute]).toString(),
+        total: 0
+      };
+    }
+    acc[key].total += d[metric];
+    return acc;
+  }, {});
+
+  console.log(Object.values(result))
 
   const config = {
-    data: data.map(d => ({date: d.date, metric: d[metric], attribute: d[attribute] && (d[attribute]).toString()})),
+    data: Object.values(result),
     xField: 'date',
-    yField: 'metric',
+    yField: 'total',
     stack: true,
     colorField: 'attribute',
     legend: false,

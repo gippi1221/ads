@@ -33,7 +33,7 @@ const Canva = observer(() => {
         {
           general.params.groupBy.split(',').map(a => (
             <div key={a} style={{ width: '100%' }}>
-              <div style={{ padding: 8 }}>{general.params.metrics.split(',')[0]} by event date and {a}</div>
+              <div style={{ padding: 8 }}>% {general.params.metrics.split(',')[0]} by event date and {a}</div>
               <BarChart attribute={a} data={data} metric={general.params.metrics.split(',')[0]} />
             </div>
           ))
@@ -46,7 +46,7 @@ const Canva = observer(() => {
           {
             general.params.groupBy.split(',').map(a => (
               <div key={a} style={{ width: '100%' }}>
-                <div style={{ padding: 8 }}>{general.params.metrics.split(',')[1]} by event date and {a}</div>
+                <div style={{ padding: 8 }}>% {general.params.metrics.split(',')[1]} by event date and {a}</div>
                 <BarChart attribute={a} data={data} metric={general.params.metrics.split(',')[1]} />
               </div>
             ))
