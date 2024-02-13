@@ -36,3 +36,5 @@ class KafkaProducer:
     This method is used to publish json message to kafka
     """
     await self.producer.send_and_wait(self.topic, data)
+
+producer = KafkaProducer()

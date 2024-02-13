@@ -1,6 +1,5 @@
 import clickhouse_connect
 from clickhouse_connect import common
-from models import Event
 
 class Database:
   """
@@ -19,3 +18,5 @@ class Database:
     Executes a query on the database.
     """
     return self.client.query(query_string, parameters=parameters)
+
+db = Database(host='clickhouse', port=8123, database='sample')
