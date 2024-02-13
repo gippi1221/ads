@@ -9,15 +9,13 @@ const BarChart = ({attribute, data, metric}) => {
       acc[key] = {
         dataset: d.dataset,
         date: d.date,
-        attribute: d[attribute] && (d[attribute]).toString(),
+        attribute: (d[attribute] !== undefined && d[attribute] !== null) ? d[attribute].toString() : undefined,
         total: 0
       };
     }
     acc[key].total += d[metric];
     return acc;
   }, {});
-
-  console.log(Object.values(result))
 
   const config = {
     data: Object.values(result),
