@@ -12,9 +12,9 @@ responses = {
 }
 
 router = APIRouter(
-    prefix="/event",
-    tags=["events"],
-    responses=responses,
+  prefix="/event",
+  tags=["events"],
+  responses=responses,
 )
 
 @router.post('/')
