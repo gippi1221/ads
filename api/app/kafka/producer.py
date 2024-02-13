@@ -1,13 +1,17 @@
+import os
 import logging
 from aiokafka import AIOKafkaProducer
 
 logger = logging.getLogger(__name__)
 
+KAFKA_SERVERS = os.getenv("KAFKA_SERVERS")
+KAFKA_TOPIC = os.getenv("KAFKA_TOPIC")
+
 class KafkaProducer:
   """
   Represents a connection and methods to work with Kafka cluster.
   """
-  def __init__(self, bootstrap_servers='kafka:9092', topic='samples'):
+  def __init__(self, bootstrap_servers, topic):
     """
     Initializes a Producer object with the given connection parameters.
     """
@@ -37,4 +41,4 @@ class KafkaProducer:
     """
     await self.producer.send_and_wait(self.topic, data)
 
-producer = KafkaProducer()
+producer = KafkaProducer(bootstrap_servers=KAFKA_SERVERS, topic=KAFKA_TOPIC)

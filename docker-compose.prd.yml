@@ -50,7 +50,7 @@ services:
     image: wurstmeister/zookeeper
     container_name: de-task-zookeeper
     env_file:
-      - ./.env.dev
+      - ./.env.prd
     logging:
       driver: "json-file"
       options:
@@ -61,7 +61,7 @@ services:
     image: wurstmeister/kafka
     container_name: de-task-kafka
     env_file:
-      - ./.env.dev
+      - ./.env.prd
     healthcheck:
       test: ["CMD", "kafka-topics.sh", "--list", "--zookeeper", "zookeeper:2181"]
       interval: 5s

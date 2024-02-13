@@ -1,5 +1,10 @@
+import os
 import clickhouse_connect
 from clickhouse_connect import common
+
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT")
+DB_NAME = os.getenv("DB_NAME")
 
 class Database:
   """
@@ -19,4 +24,4 @@ class Database:
     """
     return self.client.query(query_string, parameters=parameters)
 
-db = Database(host='clickhouse', port=8123, database='sample')
+db = Database(host=DB_HOST, port=DB_PORT, database=DB_NAME)
