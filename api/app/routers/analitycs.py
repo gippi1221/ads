@@ -4,9 +4,14 @@ from fastapi.responses import JSONResponse
 from helpers.utils import validate_params, convert_data_to_output
 from helpers.queries import build_stats_sql_query
 from typing import Optional
+from enum import Enum
 from db.client import db
 
 logger = logging.getLogger(__name__)
+
+class Granularity(str, Enum):
+  hourly = "hourly"
+  daily = "daily"
 
 responses = {
   200: {"description": "Successful operation"},
@@ -14,9 +19,9 @@ responses = {
 }
 
 router = APIRouter(
-    prefix="/analytics",
-    tags=["analytics"],
-    responses=responses,
+  prefix="/analytics",
+  tags=["analytics"],
+  responses=responses,
 )
 
 @router.get('/query')
@@ -24,7 +29,7 @@ async def get_data(
     groupBy: str = Query(..., min_length=1, description="Attributes for grouping (comma-separated)", example="attribute1,attribute4"),
     filters: Optional[str] = Query(None, description="Array of filters (attribute-value pairs)", example=[{"attribute": "attribute1", "value": "198772"}, {"attribute": "attribute4", "value": "some string"}]),
     metrics: str = Query(..., min_length=1, description="Metrics to retrieve (comma-separated, always sums)", example="metric1,metric2"),
-    granularity: str = Query(..., min_length=1, description="Granularity (hourly or daily)", example="hourly"),
+    granularity: Granularity = Query(..., min_length=1, description="Granularity (hourly or daily)", example="hourly"),
     startDate: Optional[str] = Query(None, description="Start date and time for filtering (format: YYYY-MM-DDTHH:mm:ss)", example="2023-02-02T01:00:00"),
     endDate: Optional[str] = Query(None, description="End date and time for filtering (format: YYYY-MM-DDTHH:mm:ss)", example="2023-02-02T01:00:00")
   ):
