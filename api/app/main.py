@@ -18,8 +18,8 @@ logger = logging.getLogger(__name__)
 app = FastAPI()
 
 app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
+  CORSMiddleware,
+  allow_origins=["*"],
 )
 
 @app.on_event("startup")
