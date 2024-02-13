@@ -1,4 +1,4 @@
-from helpers import parse_filters
+from helpers.utils import parse_filters
 
 def build_stats_sql_query(groupBy: str, filters: str, metrics: str, granularity: str, startDate: str, endDate: str):
   """
