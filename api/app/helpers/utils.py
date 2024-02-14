@@ -54,9 +54,6 @@ def validate_params(groupBy: str, filters: str, metrics: str, granularity: str, 
   Function is to validate incoming query parameters
   """
   #mandatory parameters
-  if granularity not in ['hourly', 'daily']:
-    raise ValueError("Invalid granularity value, must be hourly or daily")
-  
   if not re.match(r'^\w+(,\s*\w+)*$', metrics):
     raise ValueError("Invalid metrics value, must be comma-separated names")
   
