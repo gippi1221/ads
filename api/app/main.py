@@ -7,7 +7,8 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from kafka.producer import producer
 
-from routers import events, analitycs
+from routers import analytics
+from routers import events
 
 #make sure the production logger has ERROR or CRITICAL
 #as it can signifitly decrease the processing capability due to IO consuption
@@ -36,7 +37,7 @@ async def value_error_exception_handler(request: Request, exc: RequestValidation
   return JSONResponse(status_code=405, content={"description": "Invalid input"})
 
 app.include_router(events.router)
-app.include_router(analitycs.router)
+app.include_router(analytics.router)
 
 if __name__ == "__main__":
   uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
